@@ -286,8 +286,7 @@ module Config.Applicative
   , mkParser, genExample
   ) where
 
-import           Control.Applicative      (empty, liftA, many, some, (<**>),
-                                           (<|>))
+import           Control.Applicative      (empty, many, some, (<**>), (<|>))
 import           Control.Applicative.Free (Ap, liftAp, runAp, runAp_)
 import           Control.Arrow            ((&&&))
 import           Control.Monad            (when)
@@ -1049,7 +1048,7 @@ data Validation e a
 
 instance Functor (Validation e) where
   fmap f (Success x) = Success (f x)
-  fmap f (Failure e) = Failure e
+  fmap _ (Failure e) = Failure e
 
 instance Semigroup e => Applicative (Validation e) where
   pure = Success

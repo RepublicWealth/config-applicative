@@ -31,7 +31,12 @@ library
   ghc-options:         -Wall -fwarn-tabs -O2
   exposed-modules:
     Config.Applicative
-  -- other-modules:
+  other-modules:
+    Config.Applicative.Example
+    Config.Applicative.Info
+    Config.Applicative.Parse
+    Config.Applicative.Reader
+    Config.Applicative.Types
   build-depends:
     base                 ^>=4.11.1.0,
     containers           ^>=0.5,

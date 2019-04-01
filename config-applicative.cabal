@@ -31,10 +31,12 @@ library
   ghc-options:         -Wall -fwarn-tabs -O2
   exposed-modules:
     Config.Applicative
-  other-modules:
     Config.Applicative.Example
-    Config.Applicative.Info
     Config.Applicative.Parse
+    Config.Applicative.Tutorial
+  other-modules:
+    Config.Applicative.Info
+    Config.Applicative.Option
     Config.Applicative.Reader
     Config.Applicative.Types
   build-depends:

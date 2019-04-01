@@ -1,9 +1,7 @@
 module Config.Applicative.Reader
-  ( str, text, auto, boolean, enum, enumCI, nonNegative, positive, password
+  ( Reader(..), str, text, auto, boolean, enum, enumCI, nonNegative, positive, password
   , maybeReader, eitherReader, lookupReader
   ) where
-
-import Config.Applicative.Types (Reader(..))
 
 import Control.Monad (when)
 import Data.Bool     (bool)
@@ -14,6 +12,10 @@ import Text.Read     (readMaybe)
 
 import qualified Data.Map  as Map
 import qualified Data.Text as Text
+
+-- | A 'Reader' actually represents both a parser and pretty-printer.
+data Reader a
+  = Reader (String -> Either String a) (a -> String) (Maybe [a])
 
 -- | Simply pass through the parsed string unchanged.
 str :: Reader String

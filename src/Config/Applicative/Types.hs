@@ -1,57 +1,39 @@
-{-# LANGUAGE DeriveFunctor              #-}
-{-# LANGUAGE GADTs                      #-}
-{-# LANGUAGE GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE GADTs         #-}
 
 module Config.Applicative.Types
-  ( Domain(..), Metavar(..), Example(..)
-  , Info(..), Reader(..), F(..)
-  , Option(..)
+  ( IniVariable(..), ivSection, ivVariable
+  , Domain(..), Metavar(..), Sample(..)
   , Validation(..)
   ) where
 
-import Control.Applicative.Free (Ap)
-import Data.List.NonEmpty       (NonEmpty)
-import Data.Map                 (Map)
-import Data.Set                 (Set)
+import Control.Applicative ((<|>))
 
-newtype Domain    = Domain (Maybe [String]) deriving (Eq, Ord, Show)
-newtype Metavar   = Metavar String          deriving (Eq, Ord, Show)
-newtype Example a = Example (Maybe a)       deriving (Eq, Ord, Show)
+-- | Ini-file section and variable names.
+data IniVariable = IniVariable String String
+  deriving (Eq, Ord, Show)
 
-data Info a = Info
-  { optSection  :: String
-  , optVariable :: String
-  , optLongs    :: [String]
-  , optShorts   :: Set Char
-  , optEnvVar   :: String -> String
-  , optHelp     :: Maybe String
-  , optMetavar  :: String
-  , optValue    :: Maybe a
-  , optExample  :: Maybe a
-  } deriving Functor
+ivSection :: IniVariable -> String
+ivSection (IniVariable s _) = s
 
--- | A 'Reader' actually represents both a parser and pretty-printer.
-data Reader a
-  = Reader (String -> Either String a) (a -> String) (Maybe [a])
+ivVariable :: IniVariable -> String
+ivVariable (IniVariable _ v) = v
 
--- | This module is built on the free applicative functor, or
--- 'Control.Applicative.Free.Ap' from the package @free@.
---
--- It takes a \"carrier\" functor which defines the interesting parts of the
--- structure, and the free applicative functor provides a way of combining the
--- carriers.
-data F a where
-  One      :: Reader a -> Info a -> F a
-  Optional :: Reader a -> Info a -> F (Maybe a)
-  Many     :: Reader a -> Info a -> F [a]
-  Some     :: Reader a -> Info a -> F (NonEmpty a)
-  Map      :: Reader a -> Info (String, a) -> F (Map String a)
-  Commands :: Info String -> [(String, (Maybe String, Ap F a))] -> F a
-  WithIO   :: String -> (a -> IO (Either String b)) -> Ap F a -> F b
+-- | The domain of values of a variable, if known.
+newtype Domain = Domain (Maybe [String]) deriving (Eq, Ord, Show)
 
--- | Wrap @Ap F a@ in an opaque @newtype@.
-newtype Option a = Option{ getOption :: Ap F a }
-  deriving (Functor, Applicative)
+-- | The metavar string to use in help output and example files.
+newtype Metavar = Metavar String deriving (Eq, Ord, Show)
+
+-- | An optional sample value of an configuration option.
+newtype Sample a = Sample (Maybe a) deriving (Eq, Ord, Show, Functor)
+
+instance Semigroup (Sample a) where
+  Sample a <> Sample b = Sample (a <|> b)
+
+instance Monoid (Sample a) where
+  mempty  = Sample Nothing
+  mappend = (<>)
 
 
 --

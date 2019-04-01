@@ -1,23 +1,47 @@
+{-# LANGUAGE DeriveFunctor #-}
+{-# LANGUAGE GADTs         #-}
+
 module Config.Applicative.Info
-  ( name, long, short, envVar, help, metavar, value, example, autoLong
+  ( Info(..), optSection, optVariable, name, long, short, envVar, help
+  , metavar, value, sample, autoLong
   ) where
 
-import Config.Applicative.Types (Info(..))
+import Config.Applicative.Types
+  (IniVariable(..), Metavar(..), Sample(..), ivSection, ivVariable)
 
-import Control.Applicative ((<|>))
-import Data.Char           (isAlphaNum, toUpper)
-import Text.Printf         (printf)
+import Data.Char   (isAlphaNum, toUpper)
+import Data.Set    (Set)
+import Text.Printf (printf)
+
 
 import qualified Data.Set as Set
+
+data Info a = Info
+  { optIniVariable :: IniVariable
+  , optLongs       :: [String]
+  , optShorts      :: Set Char
+  , optEnvVar      :: String -> String
+  , optHelp        :: Maybe String
+  , optMetavar     :: Metavar
+  , optValue       :: Maybe a
+  , optSample      :: Sample a
+  } deriving Functor
+
+optSection, optVariable :: Info a -> String
+optSection  = ivSection  . optIniVariable
+optVariable = ivVariable . optIniVariable
 
 -- | Build a minimal 'Info' with section and variable names.
 name :: String -> String -> Info a
 name section variable =
-  Info section variable [] Set.empty envVarNm Nothing "ARG" Nothing Nothing
+  Info (IniVariable section variable) [] Set.empty envVarNm help' (Metavar "ARG") value' sample'
   where
     envVarNm prefix =
       map (\x -> if isAlphaNum x || x == '_' then x else '_')
       $ printf "%s_%s_%s" prefix section (map toUpper variable)
+    help'   = Nothing
+    value'  = Nothing
+    sample' = Sample Nothing
 
 -- | Add an additional long command line option.
 long :: String -> Info a -> Info a
@@ -39,22 +63,21 @@ help h i = i{ optHelp = Just h }
 -- | Set the metavar to use in command line @--help@ and in the generated ini
 -- files.
 metavar :: String -> Info a -> Info a
-metavar v i = i{ optMetavar = v }
+metavar v i = i{ optMetavar = Metavar v }
 
 -- | Set the default value of this option.  Used as an example value in
 -- generated ini files.
 value :: a -> Info a -> Info a
-value x i = i{ optValue = Just x, optExample = optExample i <|> Just x }
+value x i = i{ optValue = Just x, optSample = optSample i <> Sample (Just x)}
 
--- | Set the example value to use in generated ini files without giving the option a
+-- | Set the sample value to use in generated ini files without giving the option a
 -- default.
-example :: a -> Info a -> Info a
-example x i = i{ optExample = Just x }
+sample :: a -> Info a -> Info a
+sample x i = i{ optSample = Sample (Just x) }
 
 -- | Derive the default long command line option from the section and variable
 -- names.
 autoLong :: Info a -> Info a
 autoLong i = i{ optLongs = optLongs i ++ [s ++ "." ++ v]  }
   where
-    s = optSection i
-    v = optVariable i
+    IniVariable s v = optIniVariable i

@@ -35,12 +35,14 @@
 -- not just failing with the first error encountered.
 
 module Config.Applicative.Parse
-  ( mkParser, Location(..), ParseError(..)
+  ( mkParser, ParseError(..)
   ) where
 
-import Config.Applicative.Reader (lookupReader, str)
+import Config.Applicative.Info   (Info(..), optSection, optVariable)
+import Config.Applicative.Option (F(..), Option(..))
+import Config.Applicative.Reader (Reader(..), lookupReader, str)
 import Config.Applicative.Types
-  (Domain(..), Example(..), F(..), Info(..), Option(..), Reader(..), Validation(..))
+  (Domain(..), IniVariable(..), Metavar(..), Sample(..), Validation(..))
 
 import Control.Applicative      (empty, many, some, (<**>), (<|>))
 import Control.Applicative.Free (Ap, runAp)
@@ -65,15 +67,10 @@ import qualified Data.Map            as Map
 import qualified Data.Text           as Text
 import qualified Options.Applicative as Opt
 
-
--- | Ini-file section and variable names
-data Location = Location String String
-  deriving (Eq, Ord, Show)
-
 data ParseError
-    -- | Error location (section+variable), message, possibly an example value
+    -- | Error location (section+variable), message, possibly an sample value
     -- that could have been used, and the domain of values if known.
-  = ParseError Location String (Example String) Domain
+  = ParseError IniVariable String (Sample String) Domain
     -- | A 'withIO' returned a 'Left' value.  First field is the 'withIO' label
     -- and the second is the message returned in the 'Left'.
   | CheckError String String
@@ -105,6 +102,10 @@ liftPsr psr = cc ((\x -> pure (mempty, pure x)) <$> psr)
 liftErrs :: [ParseError] -> M a
 liftErrs es = cc (pure (pure (mempty, Failure es)))
 
+mkIni :: (Text -> Text) -> IniVariable -> String -> Ini
+mkIni varF (IniVariable section variable) value =
+  Ini.Ini (HM.fromList [(Text.pack section, [(varF (Text.pack variable), Text.pack value)])]) []
+
 -- | If we have a 'Reader' and an 'Info' for 'a', then record the value in our
 -- output 'Ini'.
 recording1 :: Reader a -> Info a -> M a -> M a
@@ -116,13 +117,8 @@ recordingN :: Foldable f => Reader a -> Info a -> M (f a) -> M (f a)
 recordingN (Reader _psr ppr _dom) i (M (Compose (Compose m))) = M (Compose (Compose (fmap f <$> m)))
   where
     f (Pair (Const inis) (Failure e))  = Pair (Const inis) (Failure e)
-    f (Pair (Const inis) (Success xs)) = Pair (Const (inis ++ map mkIni (toList xs))) (Success xs)
-      where
-        mkIni x =
-          let section  = Text.pack (optSection i)
-              variable = Text.pack (optVariable i)
-              txtValue = Text.pack (ppr x)
-          in Ini.Ini (HM.fromList [(section, [(variable, txtValue)])]) []
+    f (Pair (Const inis) (Success xs)) = Pair (Const (inis ++ map g (toList xs))) (Success xs)
+      where g = mkIni id (optIniVariable i) . ppr
 
 -- | If we have a 'Reader' and an 'Info' for 'a', then record a 'Map' of values in
 -- our output 'Ini'.
@@ -130,13 +126,9 @@ recordingKV :: Reader a -> Info (String, a) -> M (Map String a) -> M (Map String
 recordingKV (Reader _psr ppr _dom) i (M (Compose (Compose m))) = M (Compose (Compose (fmap f <$> m)))
   where
     f (Pair (Const inis) (Failure e)) = Pair (Const inis) (Failure e)
-    f (Pair (Const inis) (Success x)) = Pair (Const (inis ++ map mkIni (Map.toList x))) (Success x)
+    f (Pair (Const inis) (Success x)) = Pair (Const (inis ++ map g (Map.toList x))) (Success x)
       where
-        mkIni (k, v) =
-          let section  = Text.pack (optSection i)
-              variable = Text.pack (optVariable i ++ "." ++ k)
-              txtValue = Text.pack (ppr v)
-          in Ini.Ini (HM.fromList [(section, [(variable, txtValue)])]) []
+        g (k, v) = mkIni (<> "." <> Text.pack k) (optIniVariable i) (ppr v)
 
 -- | Returns a command-line parser for `optparse-applicative` package, which if
 -- it successfully parses will produce an IO action, which when run gives back
@@ -300,9 +292,7 @@ findValuesMap envVarPrefix ini env rdr@(Reader psr _ppr _dom) i =
 
 mkErr :: Reader a -> Info String -> String -> ParseError
 mkErr (Reader _psr ppr dom) i msg =
-  ParseError loc msg (Example $ optExample i) (Domain $ map ppr <$> dom)
-  where
-    loc = Location (optSection i) (optVariable i)
+  ParseError (optIniVariable i) msg (optSample i) (Domain $ map ppr <$> dom)
 
 prefixedBy :: Text -> Text -> [Text] -> [(Text, Text)]
 prefixedBy sep p = mapMaybe $ \k -> (,) k <$> Text.stripPrefix (p <> sep) k
@@ -325,4 +315,4 @@ helpO :: Info o -> Opt.Mod x a
 helpO i = foldMap Opt.help (optHelp i)
 
 metavarO :: Opt.HasMetavar x => Info o -> Opt.Mod x a
-metavarO i = Opt.metavar (optMetavar i)
+metavarO i = let Metavar v = optMetavar i in Opt.metavar v

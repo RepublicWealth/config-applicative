@@ -7,7 +7,7 @@
 -- PARSING CONFIGURATION
 --
 
--- | An 'Option' is a chain of descriptions of options that we'd like to parse.
+-- An 'Option' is a chain of descriptions of options that we'd like to parse.
 -- This is the parsing interpretation of an 'Option', what is built and returned
 -- for the user to run.
 --

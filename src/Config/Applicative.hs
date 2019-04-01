@@ -1,3 +1,10 @@
+{- |
+This module provides a unified method of configuring a program, being able to
+read settings from a ini-format file, from environment variables, and from
+the command line in a predictable and uniform manner, with room for
+customisation.
+-}
+
 module Config.Applicative
   (
     -- * 'Option'

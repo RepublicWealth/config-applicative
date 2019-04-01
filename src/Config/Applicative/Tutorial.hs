@@ -1,12 +1,5 @@
 {- |
 
-This module provides a unified method of configuring a program, being able to
-read settings from a ini-format file, from environment variables, and from
-the command line in a predictable and uniform manner, with room for
-customisation.
-
-
-
 = 'Option' Usage
 
 As an example, let's create a simple data structure for a program's
@@ -72,8 +65,8 @@ accepts the strings \"true\" and \"false\", ignoring case.
 
 > oBar :: Option (Either String Bar)
 > oBar = commands (name "FOO" "bar")
->   [ ("left",  Nothing, Left  <$> option str           (name "FOO" "message"))
->   , ("right", Nothing, Right <$> option (enum True f) (name "FOO" "value"))
+>   [ ("left",  Nothing, Left  <$> option str      (name "FOO" "message"))
+>   , ("right", Nothing, Right <$> option (enum f) (name "FOO" "value"))
 >   ]
 >   where f Frob   = "fr...ob"
 >         f Wibble = "WIBBLEWIBBLE"
@@ -86,10 +79,9 @@ define what options are then subsequently loaded, if the \"left\" value is used
 then @[FOO].message@ is consulted as a String, if the \"right\" value is used
 then @[FOO].value@ is used.
 
-The @[FOO].value@ option uses a custom 'enum' 'Reader' which takes a flag saying
-whether it is case sensitive, and a function from @Bar@ to 'String'.  The 'enum'
-'Reader' requires the @Bar@ type to have instances of the 'Enum' and 'Bounded'
-type classes.
+The @[FOO].value@ option uses a custom 'enum' 'Reader' which is case sensitive,
+and a function from @Bar@ to 'String'.  The 'enum' 'Reader' requires the @Bar@
+type to have instances of the 'Enum' and 'Bounded' type classes.
 
 > oFile :: Option (FilePath, String)
 > oFile = withIO "read-file"

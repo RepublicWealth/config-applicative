@@ -1,0 +1,6 @@
+OptParse Failure:
+Missing: --FOO.int ARG --FOO.doubles ARG COMMAND --FOO.file ARG
+
+Usage: sample2 [-c|--config ARG] [--config-example] [--config-dump]
+               --FOO.int ARG [--FOO.strings ARG] --FOO.doubles ARG
+               [--FOO.enabled ARG] COMMAND --FOO.file ARG

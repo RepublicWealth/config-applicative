@@ -1,0 +1,5 @@
+OptParse Failure:
+Missing: --XXX.abc ARG
+
+Usage: sample1 [-c|--config ARG] [--config-example] [--config-dump]
+               --XXX.abc ARG

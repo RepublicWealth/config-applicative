@@ -15,6 +15,7 @@
   - default: false   # All extensions are banned by default.
   - name:            # Only these listed extensions can be used.
     - DeriveFunctor
+    - FlexibleContexts
     - GADTs
     - GeneralizedNewtypeDeriving
     - LambdaCase

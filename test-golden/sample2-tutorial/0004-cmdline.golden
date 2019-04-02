@@ -1,0 +1,12 @@
+Parsed successfully:
+Sample2
+  { s2Int = 3
+  , s2Strings = [ "abc" , "def" , "ghi" ]
+  , s2Doubles = 3.1415 :| [ 1.4142 ]
+  , s2Enabled = fromList [ ( "x" , False ) , ( "y" , True ) ]
+  , s2Bar = Right Wibble
+  , s2File =
+      ( "test-golden/sample2-tutorial/0001-example.config"
+      , "--- INI\n--- ENV\n--- CMDLINE\n--config-example\n"
+      )
+  }

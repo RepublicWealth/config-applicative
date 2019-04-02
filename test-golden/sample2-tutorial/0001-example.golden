@@ -1,0 +1,56 @@
+[FOO]
+
+# Valid values are "left", "right".
+# When bar is left the following variables are required:
+#   - FOO.message
+# When bar is right the following variables are required:
+#   - FOO.value
+# Override using:
+#   - the SAMPLE2_FOO_BAR environment variable
+#   - the FOO.bar.left command
+#   - the FOO.bar.right command
+bar = [left|right]
+
+# May be given any number of times, but must be at least once.
+# Override using:
+#   - the SAMPLE2_FOO_DOUBLES_0, _1, _2... environment variables
+#   - the --FOO.doubles command line option
+doubles = <ARG>
+
+# Valid values are "false", "true".
+# May be given any number of times, with the key following the variable
+# separated by a full stop.
+# Override using:
+#   - the SAMPLE2_FOO_ENABLED_NONE or SAMPLE2_FOO_ENABLED_<key>... environment
+#     variables
+#   - the --FOO.enabled command line option
+# The argument must be of the form "key=value" in command line options.
+enabled.<key> = <ARG>
+
+# Override using:
+#   - the SAMPLE2_FOO_FILE environment variable
+#   - the --FOO.file command line option
+file = <ARG>
+
+# Override using:
+#   - the SAMPLE2_FOO_INT environment variable
+#   - the --FOO.int command line option
+int = <ARG>
+
+# Override using:
+#   - the SAMPLE2_FOO_MESSAGE environment variable
+#   - the --FOO.message command line option
+message = <ARG>
+
+# May be given any number of times, or not at all.
+# Override using:
+#   - the SAMPLE2_FOO_STRINGS_NONE or SAMPLE2_FOO_STRINGS_0, _1, _2...
+#     environment variables
+#   - the --FOO.strings command line option
+strings = <ARG>
+
+# Valid values are "fr...ob", "WIBBLEWIBBLE", "snarF!!!".
+# Override using:
+#   - the SAMPLE2_FOO_VALUE environment variable
+#   - the --FOO.value command line option
+value = <ARG>

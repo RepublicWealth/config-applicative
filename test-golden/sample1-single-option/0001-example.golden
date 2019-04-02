@@ -1,0 +1,6 @@
+[XXX]
+
+# Override using:
+#   - the SAMPLE1_XXX_ABC environment variable
+#   - the --XXX.abc command line option
+abc = <ARG>

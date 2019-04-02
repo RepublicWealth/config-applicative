@@ -44,7 +44,7 @@ import Config.Applicative.Reader (Reader(..), lookupReader, str)
 import Config.Applicative.Types
   (Domain(..), IniVariable(..), Metavar(..), Sample(..), Validation(..))
 
-import Control.Applicative      (empty, many, some, (<**>), (<|>))
+import Control.Applicative      (empty, some, (<**>), (<|>))
 import Control.Applicative.Free (Ap, runAp)
 import Data.Bifunctor           (bimap)
 import Data.Foldable            (find, fold, toList)
@@ -212,7 +212,7 @@ mkParserOption envVarPrefix ini env = go
     -- Build a command line parser that reads any number of values, in a
     -- "<key>=<value>" format.
     kv :: Info (String, a) -> Reader a -> Opt.Parser [(String, a)]
-    kv i (Reader psr _ppr _dom) = many $
+    kv i (Reader psr _ppr _dom) = some $
       Opt.option (Opt.eitherReader f) $
         longO i <> shortO i <> helpO i <> metavarO i
       where f x = case break (== '=') x of
@@ -278,7 +278,7 @@ findValuesMap envVarPrefix ini env rdr@(Reader psr _ppr _dom) i =
   where
     iniSection  = Text.pack (optSection i)
     iniKeys     = prefixedBy "." (Text.pack (optVariable i)) $ fold $ Ini.keys iniSection ini
-    envKeys     = prefixedBy "_" (Text.pack (optEnvVar i envVarPrefix))   $ map fst env
+    envKeys     = prefixedBy "_" (Text.pack (optEnvVar i envVarPrefix)) $ map fst env
     envKeyEmpty = Text.pack $ printf "%s_NONE" (optEnvVar i envVarPrefix)
     iniValues   = Just $ lookupWith iniKeys (\v -> findHead (Ini.lookupValue iniSection v ini))
     envValues   = case (lookupWith envKeys (`lookup` env), lookup envKeyEmpty env) of

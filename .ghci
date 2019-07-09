@@ -1,0 +1,3 @@
+:seti -XOverloadedStrings -XQuasiQuotes
+:set -isrc -itest
+:load test/Main

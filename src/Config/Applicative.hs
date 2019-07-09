@@ -17,11 +17,17 @@ module Config.Applicative
   , Rdr.Reader, Rdr.str, Rdr.text, Rdr.auto, Rdr.boolean, Rdr.enum, Rdr.enumCI
   , Rdr.nonNegative, Rdr.positive, Rdr.password, Rdr.maybeReader, Rdr.eitherReader
   , Rdr.lookupReader
+    -- * Parsing
+  , Psr.ParseError(..), Psr.mkParser
+    -- * Example Generation
+  , Exa.genExample
     -- * Other
   , Typ.IniVariable(..), Typ.Sample(..), Typ.Domain(..)
   ) where
 
-import qualified Config.Applicative.Info   as Inf
-import qualified Config.Applicative.Option as Opt
-import qualified Config.Applicative.Reader as Rdr
-import qualified Config.Applicative.Types  as Typ
+import qualified Config.Applicative.Example as Exa
+import qualified Config.Applicative.Info    as Inf
+import qualified Config.Applicative.Option  as Opt
+import qualified Config.Applicative.Parse   as Psr
+import qualified Config.Applicative.Reader  as Rdr
+import qualified Config.Applicative.Types   as Typ

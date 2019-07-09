@@ -74,7 +74,7 @@ exSection, exVariable :: ExampleItem -> String
 exSection  = ivSection  . exIniVariable
 exVariable = ivVariable . exIniVariable
 
--- | Generate a heavily-commented sample ini configuration file based on an
+-- | Generate a heavily-commented example ini configuration file based on an
 -- 'Option' definition.
 genExample
   :: String    -- ^ Prefix to add to environment variables searched for.
